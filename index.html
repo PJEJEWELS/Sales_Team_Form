@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-image: url('ornaments.jpg');
+      background-image: url('https://pjejewels.github.io/Sales_Team_Form/ornaments.jpg');
       background-size: cover;
       background-repeat: no-repeat;
       background-attachment: fixed;
@@ -49,6 +49,22 @@
     .form-container button:hover {
       background-color: #45a049;
     }
+    
+    .staff-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    .staff-controls button {
+      background-color: #2196F3;
+      padding: 6px;
+      font-size: 13px;
+      width: 50%;
+    }
+    .staff-controls button:hover {
+      background-color: #0b7dda;
+    }
+
     #successMessage, #errorMessage {
       display: none;
       padding: 10px;
@@ -106,7 +122,7 @@
 </head>
 <body>
 
-<img src="Logo1.jpg" alt="Logo" class="logo">
+<img src="https://pjejewels.github.io/Sales_Team_Form/Logo1.jpg" alt="Logo" class="logo">
 
 <div id="loginContainer">
   <h2>Login</h2>
@@ -135,40 +151,20 @@
         <label for="staffName">Staff Name:</label>
         <select id="staffName" name="staffName" class="staff-name" required>
           <option value="">Select Staff</option>
-          <option value="Rama Devi">Rama Devi</option>
-          <option value="Pavani">Pavani</option>
-          <option value="Keerthi">Keerthi</option>
-          <option value="Suman">Suman</option>
-           <option value="Shravani">Shravani</option>
-          <option value="Ravinder">Ravinder</option>
-          <option value="Manjunath">Manjunath</option>
-          <option value="Reddy">Reddy</option>
-          <option value="K Maruti">K Maruti</option>
-          <option value="Anju">Anju</option>
-          <option value="B Renuka">B Renuka</option>
-          <option value="Ashwini">Ashwini</option>
-          <option value="Rego Richerd">Rego Richerd</option>
-          <option value="B Mahesh">B Mahesh</option>
-          <option value="Vijakar">Vijakar</option>
-          <option value="Sandhya">Sandhya</option>
-          <option value="Ganesh">Ganesh</option>
-          <option value="Nancy">Nancy</option>
-          <option value="Krishna">Krishna</option>
-        
-          <option value="Manasa">Manasa</option>
-          <option value="G Keerithi">G Keerithi</option>
-         
-          <option value="B Shiva">B Shiv</option>
-           <option value="Bhushan Singh">Bhushan Singh</option>
-          <option value="Rishab">Rishab</option>
-         
         </select>
+        
+        <div class="staff-controls">
+          <button type="button" onclick="addStaff()">+ Add Staff</button>
+          <button type="button" onclick="modifyStaff()">✎ Modify Staff</button>
+        </div>
       </div>
+      
       <div>
         <label for="totalWalkIn">Total Walk-in:</label>
         <input type="number" id="totalWalkIn" name="totalWalkIn" required>
       </div>
     </div>
+    
     <div class="three-columns">
       <div>
         <label for="bill">Bill:</label>
@@ -278,18 +274,90 @@
       </div>
     </div>
 
-    <button type="submit">Submit</button>
+    <button type="submit" style="margin-top: 15px;">Submit</button>
   </form>
 </div>
 
-<!-- Submitted Staff Names Section -->
 <div id="submittedStaffContainer" class="form-container" style="margin-top: 20px; display: none;">
   <h3>Submitted Staff Names Today</h3>
   <ul id="submittedStaffList"></ul>
 </div>
 
 <script>
-  const submittedStaffNames = []; // Array to store submitted staff names
+  const defaultStaffList = [
+    "Rama Devi", "Pavani", "Keerthi", "Suman", "Shravani", "Ravinder", 
+    "Manjunath", "Reddy", "K Maruti", "Anju", "B Renuka", "Ashwini", 
+    "Rego Richerd", "B Mahesh", "Vijakar", "Sandhya", "Ganesh", "Nancy", 
+    "Krishna", "Manasa", "G Keerithi", "B Shiva", "Bhushan Singh", "Rishab"
+  ];
+
+  const submittedStaffNames = [];
+
+  document.addEventListener("DOMContentLoaded", loadStaff);
+
+  function loadStaff() {
+    const select = document.getElementById("staffName");
+    let storedStaff = JSON.parse(localStorage.getItem("staffList"));
+    
+    if (!storedStaff) {
+      storedStaff = defaultStaffList;
+      localStorage.setItem("staffList", JSON.stringify(storedStaff));
+    }
+
+    select.innerHTML = '<option value="">Select Staff</option>';
+
+    storedStaff.forEach(staff => {
+      const option = document.createElement("option");
+      option.value = staff;
+      option.textContent = staff;
+      select.appendChild(option);
+    });
+  }
+
+  function addStaff() {
+    const newStaff = prompt("Enter the name of the new staff member:");
+    if (newStaff && newStaff.trim() !== "") {
+      const name = newStaff.trim();
+      let storedStaff = JSON.parse(localStorage.getItem("staffList")) || defaultStaffList;
+
+      if (!storedStaff.includes(name)) {
+        storedStaff.push(name);
+        storedStaff.sort(); 
+        localStorage.setItem("staffList", JSON.stringify(storedStaff));
+        loadStaff(); 
+        alert(`"${name}" has been added successfully!`);
+      } else {
+        alert("This staff member already exists in the list.");
+      }
+    }
+  }
+
+  function modifyStaff() {
+    const select = document.getElementById("staffName");
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (selectedOption.value === "") {
+      alert("Please select a staff member from the dropdown first to modify their name.");
+      return;
+    }
+
+    const oldName = selectedOption.value;
+    const newName = prompt("Modify the staff name:", oldName);
+
+    if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+      const name = newName.trim();
+      let storedStaff = JSON.parse(localStorage.getItem("staffList"));
+
+      const index = storedStaff.indexOf(oldName);
+      if (index !== -1) {
+        storedStaff[index] = name;
+        storedStaff.sort(); 
+        localStorage.setItem("staffList", JSON.stringify(storedStaff));
+        loadStaff(); 
+        alert(`Staff member updated to "${name}".`);
+      }
+    }
+  }
 
   function login() {
     const username = document.getElementById("username").value;
@@ -330,47 +398,37 @@
         errorMessage.style.display = "block";
         errorMessage.style.backgroundColor = "red";
         errorMessage.innerText = "Duplicate Entry! Please check and try again.";
-        
         setTimeout(() => errorMessage.style.display = "none", 5000);
       } else {
         form.reset();
         successMessage.style.display = "block";
         successMessage.style.backgroundColor = "green";
         successMessage.innerText = "Form submitted successfully!";
-        
         setTimeout(() => successMessage.style.display = "none", 5000);
           
-          // Add staff name to list
-          const staffName = formData.get("staffName");
-          if (!submittedStaffNames.includes(staffName)) {
-            submittedStaffNames.push(staffName);
-            updateSubmittedStaffList();
-          }
+        const staffName = formData.get("staffName");
+        if (!submittedStaffNames.includes(staffName)) {
+          submittedStaffNames.push(staffName);
+          updateSubmittedStaffList();
         }
-      })
-      .catch((error) => console.error("Error:", error));
+      }
+    })
+    .catch((error) => console.error("Error:", error));
   }
 
   function updateSubmittedStaffList() {
     const submittedStaffContainer = document.getElementById("submittedStaffContainer");
     const submittedStaffList = document.getElementById("submittedStaffList");
-    submittedStaffList.innerHTML = ""; // Clear existing list
+    submittedStaffList.innerHTML = ""; 
+    
     submittedStaffNames.forEach((name) => {
       const li = document.createElement("li");
       li.textContent = name;
       submittedStaffList.appendChild(li);
     });
-    submittedStaffContainer.style.display = "block"; // Show the container
+    submittedStaffContainer.style.display = "block"; 
   }
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
